@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Branch-and-Bound</title>
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+    <script type="text/javascript" src="./vivagraph.min.js"></script>
+    <style media="screen">
+    svg{
+        overflow: visible !important;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h5>Objetos</h5>
+            <ul id="objetos" class="collection">
+                <li id="obj1-item" class="collection-item row">
+                    <div class=" col s11">
+                        <input id="obj1" type="text" placeholder="Digite o nome do objeto 1">
+                    </div>
+                    <div class=" col s1">
+                        <a onclick="$(this).parent().parent().remove()" class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">backspace</i></a>
+                    </div>
+                </li>
+            </ul>
+            <a id="newObj-btn" class="waves-effect waves-light btn"><i class="material-icons left">add_circle</i>Novo Objeto</a>
+            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Tabela</a>
+        </div>
+        <div class="divider"></div>
+
+        <div class="section">
+            <h5>Tabela de Valores</h5>
+            <div class="row">
+                <div class="col s12" id="table-view">
+                </div>
+            </div>
+            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Grafo</a>
+        </div>
+        <br><br>
+        <div class="divider"></div>
+
+        <div class="section">
+            <h5>Grafo</h5>
+            <div class="row">
+                <div class="col s12" id="grafo-view" style="height: 300px; border: 1px solid #ddd;">
+
+                </div>
+            </div>
+            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Solução</a>
+        </div>
+        <br><br>
+        <div class="divider"></div>
+
+        <div class="section">
+            <h5>Solução</h5>
+            <div class="row">
+                <div class="col s12" id="solucao-view">
+
+                </div>
+            </div>
+        </div>
+        <br><br>
+        <div class="divider"></div>
+    </div>
+
+
+    <script type="text/javascript">
+    $(document).on("ready",function(){
+        $("#newObj-btn").on("click",function(){
+            var id = parseInt(Math.random() * 10000) + 1;
+            var html = "<li id=\"obj"+ id +"-item\" class=\"collection-item row\">"+
+            "<div class=\" col s11\">"+
+            "<input id=\"obj"+ id +"\" type=\"text\" placeholder=\"Digite o nome do objeto "+ id +"\">"+
+            "</div>"+
+            "<div class=\" col s1\">"+
+            "<a onclick=\"$(this).parent().parent().remove()\" class=\"btn-floating btn-large waves-effect waves-light red\"><i class=\"material-icons\">backspace</i></a>"+
+            "</div>"+
+            "</li>";
+            $("#objetos").append(html);
+        })
+    });
+    </script>
+
+    <script type="text/javascript">
+    var graph = Viva.Graph.graph();
+
+    // Construct the graph
+    graph.addNode('anvaka', {url : 'https://secure.gravatar.com/avatar/91bad8ceeec43ae303790f8fe238164b'});
+    graph.addNode('manunt', {url : 'https://secure.gravatar.com/avatar/c81bfc2cf23958504617dd4fada3afa8'});
+    graph.addNode('thlorenz', {url : 'https://secure.gravatar.com/avatar/1c9054d6242bffd5fd25ec652a2b79cc'});
+    graph.addNode('bling', {url : 'https://secure.gravatar.com/avatar/24a5b6e62e9a486743a71e0a0a4f71af'});
+    graph.addNode('diyan', {url : 'https://secure.gravatar.com/avatar/01bce7702975191fdc402565bd1045a8?'});
+    graph.addNode('pocheptsov', {url : 'https://secure.gravatar.com/avatar/13da974fc9716b42f5d62e3c8056c718'});
+    graph.addNode('dimapasko', {url : 'https://secure.gravatar.com/avatar/8e587a4232502a9f1ca14e2810e3c3dd'});
+
+    graph.addLink('anvaka', 'manunt');
+    graph.addLink('anvaka', 'thlorenz');
+    graph.addLink('anvaka', 'bling');
+    graph.addLink('anvaka', 'diyan');
+    graph.addLink('anvaka', 'pocheptsov');
+    graph.addLink('anvaka', 'dimapasko');
+
+    // Set custom nodes appearance
+    var graphics = Viva.Graph.View.webglGraphics();
+    graphics.placeNode(function(nodeUI, pos){
+        // Shift image to let links go to the center:
+        nodeUI.text = nodeUI.id;
+    });
+
+
+    var events = Viva.Graph.webglInputEvents(graphics, graph);
+    events.click(function (node) {
+        console.log('Single click on node: ' + node.id);
+    });
+
+    // specify where it should be rendered:
+    var renderer = Viva.Graph.View.renderer(graph, {
+        graphics : graphics,
+        container: document.getElementById('grafo-view'),
+    });
+    renderer.run();
+    </script>
+</body>
+</html>
