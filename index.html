@@ -10,6 +10,7 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
     <script type="text/javascript" src="./vivagraph.min.js"></script>
+
     <style media="screen">
     svg{
         overflow: visible !important;
@@ -17,8 +18,17 @@
     </style>
 </head>
 <body>
+    <div class="col hide-on-small-only m3 l2" style="position: fixed; margin-left: 20px;">
+        <ul class="section table-of-contents">
+            <li><a href="#objetos-section">Objetos</a></li>
+            <li><a href="#tabela-section">Tabela de Valores</a></li>
+            <li><a href="#grafo-section">Grafo</a></li>
+            <li><a href="#problema-section">Problema</a></li>
+            <li><a href="#solucao-section">Solução</a></li>
+        </ul>
+    </div>
     <div class="container">
-        <div class="section">
+        <div id="objetos-section" class="section">
             <h5>Objetos</h5>
             <ul id="objetos" class="collection">
                 <li id="obj1-item" class="collection-item row">
@@ -35,7 +45,7 @@
         </div>
         <div class="divider"></div>
 
-        <div class="section">
+        <div id="tabela-section" class="section">
             <h5>Tabela de Valores</h5>
             <small>(Se um objeto não ligar com outro, deixe o campo vazio)</small>
             <div class="row">
@@ -50,7 +60,7 @@
         <br><br>
         <div class="divider"></div>
 
-        <div class="section">
+        <div id="grafo-section" class="section">
             <h5>Grafo</h5>
             <div class="row">
                 <div class="col s12" id="grafo-view" style="height: 300px; border: 1px solid #ddd;">
@@ -62,33 +72,37 @@
         <br><br>
         <div class="divider"></div>
 
-        <div class="section">
+        <div id="problema-section" class="section">
             <h5>Problema</h5>
             <div class="row">
                 <div class="col s12" id="problema-view">
 
                 </div>
             </div>
-            <a class="waves-effect waves-light btn light-blue lighten-1 right"><i class="material-icons left">timeline</i>Gerar Solução</a>
+            <a id="criar-solucao-btn" class="waves-effect waves-light btn light-blue lighten-1 right"><i class="material-icons left">timeline</i>Gerar Solução</a>
         </div>
         <br><br>
         <div class="divider"></div>
 
-        <div class="section">
+        <div id="solucao-section" class="section">
             <h5>Solução</h5>
             <div class="row">
                 <div class="col s12" id="solucao-view">
+                    <div class="col s12" id="arvore-view" style="height: 300px; border: 1px solid #ddd;">
 
+                    </div>
                 </div>
             </div>
         </div>
         <br><br>
         <div class="divider"></div>
+
     </div>
 
 
+
     <script type="text/javascript">
-    var objetos = ["1"];
+    var objetos = [1];
     $(document).on("ready",function(){
         $("#newObj-btn").on("click",function(){
             var id = parseInt(Math.random() * 10000) + 1;
@@ -101,6 +115,7 @@
             "</div>"+
             "</li>";
             $("#objetos").append(html);
+            $("#obj" + id).focus();
             objetos.push(id);
         })
     });
@@ -136,7 +151,7 @@
             var input = $(this);
             var ids = input.attr("id").replace("input-","").split("-");
             var value = document.getElementById($(this).attr("id")).value;
-            console.log(value);
+            //console.log(value);
             $("#input-" + ids[1] + "-" + ids[0]).val(value);
         });
 
@@ -144,8 +159,9 @@
     </script>
 
     <script type="text/javascript">
+    var grafo = {};
     $(document).on("ready",function(){
-        var grafo = {};
+
         $("#create-grafo-btn").on("click",function(){
             for(var indexX in objetos){
                 var objX = objetos[indexX];
@@ -155,7 +171,7 @@
                     grafo[objX][objY] = document.getElementById("input-" + objX + "-" + objY).value;
                 }
             }
-            console.log(grafo);
+            //console.log(grafo);
             var graph = Viva.Graph.graph();
 
             for(var index in objetos){
@@ -176,7 +192,6 @@
 
                 }
             }
-            //
 
 
             // Set custom nodes appearance
@@ -204,25 +219,125 @@
     </script>
 
     <script type="text/javascript">
-        $(document).on("ready",function(){
-            $("#criar-problema-btn").on("click",function(){
-                var options = "";
+    $(document).on("ready",function(){
+        $("#criar-problema-btn").on("click",function(){
+            var options = "";
 
-                for(var index in objetos){
-                    var obj = objetos[index];
-                    options += "<option name='"+ obj +"'>"+ $("#obj" + obj).val() +"</option>";
-                }
+            for(var index in objetos){
+                var obj = objetos[index];
+                options += "<option value='"+ obj +"'>"+ $("#obj" + obj).val() +"</option>";
+            }
 
-                var selects = "<label>Sair do nó</label><select id='sai'><option value='' disabled selected>Sair do nó</option>";
-                selects += options + "</select><br>";
-                selects += "<label>Chegar no nó</label><select id='chega'><option value='' disabled selected>Chegar no nó</option>";
-                selects += options + "</select>";
+            var selects = "<label>Sair do nó</label><select id='sai'><option value='' disabled selected>Sair do nó</option>";
+            selects += options + "</select><br>";
+            selects += "<label>Chegar no nó</label><select id='chega'><option value='' disabled selected>Chegar no nó</option>";
+            selects += options + "</select>";
 
-                $("#problema-view").html(selects);
-                $('select').material_select();
-            });
-
+            $("#problema-view").html(selects);
+            $('select').material_select();
         });
+
+    });
     </script>
+
+    <script type="text/javascript">
+
+    var No = function NoClass(args){
+        var id = args['id'];
+        var letra = args["letra"];
+        var valorAcumulado = args["valorAcumulado"];
+        var pai = args["pai"];
+        var filhos = {};
+
+
+
+        this.getLetra = function(){
+            return letra;
+        }
+
+        this.getValorAcumulado = function(){
+            return valorAcumulado;
+        }
+
+        this.getId = function(){
+            return id;
+        }
+
+        this.addFilho = function(id, filho){
+            var array = Array.from(filhos);
+            if(!array.some( (current) =>  current.getId() == id )){
+                filhos[id] = filho;
+            }
+            return this;
+        }
+
+        this.getFilhos = function(){
+            return filhos;
+        }
+
+    }
+
+    function branch(graph, sai,caminho,acumulado,paiArg){
+        var Raiz = new No({id: sai, letra: $("#obj" + sai).val(), valorAcumulado: acumulado, pai: paiArg});
+        caminho += "-" + sai;
+        for(x in graph[sai]){
+            if(caminho.indexOf(x) == -1 && graph[sai][x] != undefined && graph[sai][x] != ""){
+                Raiz.addFilho(x,branch(graph,x,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz));
+            }
+        }
+        return Raiz;
+    }
+
+    function bound(arvore,chega){
+
+        var graph = Viva.Graph.graph();
+
+        var melhorCaminho = {
+            rota: "",
+            valor: Infinity
+        };
+
+        var caminho = {
+            rota: "",
+            valor: 0
+        };
+
+
+
+
+
+
+        // specify where it should be rendered:
+        var renderer = Viva.Graph.View.renderer(graph, {
+            graphics : graphics,
+            container: document.getElementById('arvore-view'),
+        });
+        renderer.run();
+
+        return {melhorCaminho: melhorCaminho, arvore: arvore};
+    }
+
+    function branchAndBound(graph, sai, chega){
+        return bound(branch(graph,sai,"",0,undefined),chega);
+    }
+
+    solucao = undefined;
+
+    $(document).on("ready",function(){
+        $("#criar-solucao-btn").on("click",function(){
+            solucao = branchAndBound(grafo,$("#sai").val(),$("#chega").val());
+        });
+    });
+    </script>
+
+
+    <script type="text/javascript">
+
+    $(document).ready(function(){
+        $('.scrollspy').scrollSpy();
+    });
+
+    </script>
+
 </body>
 </html>
