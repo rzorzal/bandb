@@ -277,48 +277,50 @@
 
     }
 
-    function branch(graph, sai,caminho,acumulado,paiArg){
+    function branch(graph, sai,caminho,acumulado,paiArg,caminhos){
         var Raiz = new No({id: sai, letra: $("#obj" + sai).val(), valorAcumulado: acumulado, pai: paiArg});
         caminho += "-" + sai;
         for(x in graph[sai]){
             if(caminho.indexOf(x) == -1 && graph[sai][x] != undefined && graph[sai][x] != ""){
-                Raiz.addFilho(x,branch(graph,x,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz));
+                Raiz.addFilho(x,branch(graph,x,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz,caminhos));
             }
+        }
+        if(Object.keys(Raiz.getFilhos()).length <= 0){
+            caminhos.push({caminho: caminho, valorAcumulado: Raiz.getValorAcumulado()});
         }
         return Raiz;
     }
 
-    function bound(arvore,chega){
-
+    function bound(arvore,chega,caminhos){
         var graph = Viva.Graph.graph();
 
-        var melhorCaminho = {
-            rota: "",
-            valor: Infinity
-        };
+        var melhor = undefined;
 
-        var caminho = {
-            rota: "",
-            valor: 0
-        };
+        for(i in caminhos){
+            var caminhoT = caminhos[i];
 
-
+            var nos = caminhoT.caminho.split("-").slice(1);
+            var folha = nos[nos.length - 1];
+            if((melhor == undefined || caminhoT.valorAcumulado <= melhor.caminhoAcumulado) && folha == chega){
+                melhor = caminhoT;
+            }
+        }
 
 
 
 
         // specify where it should be rendered:
         var renderer = Viva.Graph.View.renderer(graph, {
-            graphics : graphics,
             container: document.getElementById('arvore-view'),
         });
         renderer.run();
 
-        return {melhorCaminho: melhorCaminho, arvore: arvore};
+        return {melhorCaminho: melhor, arvore: arvore, caminhos: caminhos};
     }
 
     function branchAndBound(graph, sai, chega){
-        return bound(branch(graph,sai,"",0,undefined),chega);
+        caminhos = [];
+        return bound(branch(graph,sai,"",0,undefined,caminhos),chega,caminhos);
     }
 
     solucao = undefined;
