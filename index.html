@@ -31,17 +31,21 @@
                 </li>
             </ul>
             <a id="newObj-btn" class="waves-effect waves-light btn"><i class="material-icons left">add_circle</i>Novo Objeto</a>
-            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Tabela</a>
+            <a id="create-table-btn" class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Tabela</a>
         </div>
         <div class="divider"></div>
 
         <div class="section">
             <h5>Tabela de Valores</h5>
+            <small>(Se um objeto não ligar com outro, deixe o campo vazio)</small>
             <div class="row">
                 <div class="col s12" id="table-view">
+                    <table id="tabela-view" class="responsive-table striped centered">
+
+                    </table>
                 </div>
             </div>
-            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Grafo</a>
+            <a id="create-grafo-btn" class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Grafo</a>
         </div>
         <br><br>
         <div class="divider"></div>
@@ -53,7 +57,19 @@
 
                 </div>
             </div>
-            <a class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Solução</a>
+            <a id="criar-problema-btn" class="waves-effect waves-light btn light-blue lighten-2 right"><i class="material-icons left">view_comfy</i>Criar Problema</a>
+        </div>
+        <br><br>
+        <div class="divider"></div>
+
+        <div class="section">
+            <h5>Problema</h5>
+            <div class="row">
+                <div class="col s12" id="problema-view">
+
+                </div>
+            </div>
+            <a class="waves-effect waves-light btn light-blue lighten-1 right"><i class="material-icons left">timeline</i>Gerar Solução</a>
         </div>
         <br><br>
         <div class="divider"></div>
@@ -72,6 +88,7 @@
 
 
     <script type="text/javascript">
+    var objetos = ["1"];
     $(document).on("ready",function(){
         $("#newObj-btn").on("click",function(){
             var id = parseInt(Math.random() * 10000) + 1;
@@ -84,48 +101,128 @@
             "</div>"+
             "</li>";
             $("#objetos").append(html);
+            objetos.push(id);
         })
     });
     </script>
 
     <script type="text/javascript">
-    var graph = Viva.Graph.graph();
+    $(document).on("ready",function(){
+        //tabela-view
+        $("#create-table-btn").on("click",function(){
+            var table = "<thead><tr><th>Objetos</th>";
+            for(var index in objetos){
+                var obj = objetos[index];
+                table += "<th>"+ $("#obj" + obj).val() +"</th>";
+            }
+            table += "</tr></thead><tbody>";
 
-    // Construct the graph
-    graph.addNode('anvaka', {url : 'https://secure.gravatar.com/avatar/91bad8ceeec43ae303790f8fe238164b'});
-    graph.addNode('manunt', {url : 'https://secure.gravatar.com/avatar/c81bfc2cf23958504617dd4fada3afa8'});
-    graph.addNode('thlorenz', {url : 'https://secure.gravatar.com/avatar/1c9054d6242bffd5fd25ec652a2b79cc'});
-    graph.addNode('bling', {url : 'https://secure.gravatar.com/avatar/24a5b6e62e9a486743a71e0a0a4f71af'});
-    graph.addNode('diyan', {url : 'https://secure.gravatar.com/avatar/01bce7702975191fdc402565bd1045a8?'});
-    graph.addNode('pocheptsov', {url : 'https://secure.gravatar.com/avatar/13da974fc9716b42f5d62e3c8056c718'});
-    graph.addNode('dimapasko', {url : 'https://secure.gravatar.com/avatar/8e587a4232502a9f1ca14e2810e3c3dd'});
+            for(var indexX in objetos){
+                var objX = objetos[indexX];
+                table += "<tr><td><b>"+ $("#obj" + objX).val() +"</b></td>";
+                for(var indexY in objetos){
+                    var objY = objetos[indexY];
+                    table += "<td><input placeholder='De "+ $('#obj' + objX).val() +" para "+ $('#obj' + objY).val() +"' class='data-input' id='input-"+ objX +"-"+  objY +"' "+ ((objX==objY)?'disabled':'') +"></td>";
+                }
+                table += "</tr>";
+            }
+            table += "</tbody>";
 
-    graph.addLink('anvaka', 'manunt');
-    graph.addLink('anvaka', 'thlorenz');
-    graph.addLink('anvaka', 'bling');
-    graph.addLink('anvaka', 'diyan');
-    graph.addLink('anvaka', 'pocheptsov');
-    graph.addLink('anvaka', 'dimapasko');
+            $("#tabela-view").html(table);
+            //console.log(table);
+        });
 
-    // Set custom nodes appearance
-    var graphics = Viva.Graph.View.webglGraphics();
-    graphics.placeNode(function(nodeUI, pos){
-        // Shift image to let links go to the center:
-        nodeUI.text = nodeUI.id;
+        $(document).on("keyup",".data-input",function(){
+            var input = $(this);
+            var ids = input.attr("id").replace("input-","").split("-");
+            var value = document.getElementById($(this).attr("id")).value;
+            console.log(value);
+            $("#input-" + ids[1] + "-" + ids[0]).val(value);
+        });
+
+    });
+    </script>
+
+    <script type="text/javascript">
+    $(document).on("ready",function(){
+        var grafo = {};
+        $("#create-grafo-btn").on("click",function(){
+            for(var indexX in objetos){
+                var objX = objetos[indexX];
+                grafo[objX] = {};
+                for(var indexY in objetos){
+                    var objY = objetos[indexY];
+                    grafo[objX][objY] = document.getElementById("input-" + objX + "-" + objY).value;
+                }
+            }
+            console.log(grafo);
+            var graph = Viva.Graph.graph();
+
+            for(var index in objetos){
+                var obj = objetos[index];
+                // Construct the graph
+                graph.addNode(obj, {obj : $("#obj" + obj).val()});
+            }
+
+            for(var i in grafo){
+                for(var j in grafo[i]){
+                    if(i == j){
+                        break;
+                    }
+                    var valor = grafo[i][j];
+                    if(valor != ""){
+                        graph.addLink(i, j,{"valor": valor});
+                    }
+
+                }
+            }
+            //
+
+
+            // Set custom nodes appearance
+            var graphics = Viva.Graph.View.webglGraphics();
+            graphics.placeNode(function(nodeUI, pos){
+                // Shift image to let links go to the center:
+                nodeUI.text = nodeUI.id;
+            });
+
+
+            var events = Viva.Graph.webglInputEvents(graphics, graph);
+            events.click(function (node) {
+                console.log(node);
+            });
+
+            // specify where it should be rendered:
+            var renderer = Viva.Graph.View.renderer(graph, {
+                graphics : graphics,
+                container: document.getElementById('grafo-view'),
+            });
+            renderer.run();
+        });
     });
 
+    </script>
 
-    var events = Viva.Graph.webglInputEvents(graphics, graph);
-    events.click(function (node) {
-        console.log('Single click on node: ' + node.id);
-    });
+    <script type="text/javascript">
+        $(document).on("ready",function(){
+            $("#criar-problema-btn").on("click",function(){
+                var options = "";
 
-    // specify where it should be rendered:
-    var renderer = Viva.Graph.View.renderer(graph, {
-        graphics : graphics,
-        container: document.getElementById('grafo-view'),
-    });
-    renderer.run();
+                for(var index in objetos){
+                    var obj = objetos[index];
+                    options += "<option name='"+ obj +"'>"+ $("#obj" + obj).val() +"</option>";
+                }
+
+                var selects = "<label>Sair do nó</label><select id='sai'><option value='' disabled selected>Sair do nó</option>";
+                selects += options + "</select><br>";
+                selects += "<label>Chegar no nó</label><select id='chega'><option value='' disabled selected>Chegar no nó</option>";
+                selects += options + "</select>";
+
+                $("#problema-view").html(selects);
+                $('select').material_select();
+            });
+
+        });
     </script>
 </body>
 </html>
