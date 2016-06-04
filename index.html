@@ -276,17 +276,33 @@
         }
 
     }
+    
+    bestSolution = {
+    	caminho: "",
+    	valorAcumulado: Infinity
+    }
 
-    function branch(graph, sai,caminho,acumulado,paiArg,caminhos){
+    function branch(graph, sai,chega,caminho,acumulado,paiArg,caminhos){
         var Raiz = new No({id: sai, letra: $("#obj" + sai).val(), valorAcumulado: acumulado, pai: paiArg});
         caminho += "-" + sai;
+        
+        if(Raiz.getValorAcumulado() >= bestSolution.valorAcumulado){
+		return Raiz;
+        }
+        
         for(x in graph[sai]){
             if(caminho.indexOf(x) == -1 && graph[sai][x] != undefined && graph[sai][x] != ""){
-                Raiz.addFilho(x,branch(graph,x,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz,caminhos));
+                Raiz.addFilho(x,branch(graph,x,chega,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz,caminhos));
             }
         }
         if(Object.keys(Raiz.getFilhos()).length <= 0){
             caminhos.push({caminho: caminho, valorAcumulado: Raiz.getValorAcumulado()});
+            
+            if(sai == chega && Raiz.getValorAcumulado() < bestSolution.valorAcumulado){
+            	bestSolution.valorAcumulado = Raiz.getValorAcumulado();
+            	bestSolution.caminho = caminho;
+            }
+            
         }
         return Raiz;
     }
@@ -320,7 +336,7 @@
 
     function branchAndBound(graph, sai, chega){
         caminhos = [];
-        return bound(branch(graph,sai,"",0,undefined,caminhos),chega,caminhos);
+        return bound(branch(graph,sai,chega,"",0,undefined,caminhos),chega,caminhos);
     }
 
     solucao = undefined;
@@ -328,6 +344,14 @@
     $(document).on("ready",function(){
         $("#criar-solucao-btn").on("click",function(){
             solucao = branchAndBound(grafo,$("#sai").val(),$("#chega").val());
+            var nodes = bestSolution.caminho.split("-").slice(1);
+            var viewCaminho = "-";
+            for(var n in nodes){
+            	viewCaminho += "-" + $("#obj" + nodes[n]).val();
+            }
+            
+            $("#solucao-view").html("<h2>"+ viewCaminho.replace("--","") + " = " + bestSolution.valorAcumulado +"</h2>");
+
         });
     });
     </script>
