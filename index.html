@@ -276,7 +276,7 @@
         }
 
     }
-    
+
     /*bestSolution = {
     	caminho: "",
     	valorAcumulado: Infinity
@@ -285,25 +285,25 @@
     function branch(graph, sai,chega,caminho,acumulado,paiArg,caminhos){
         var Raiz = new No({id: sai, letra: $("#obj" + sai).val(), valorAcumulado: acumulado, pai: paiArg});
         caminho += "-" + sai;
-        
+
         if(Raiz.getValorAcumulado() >= bestSolution.valorAcumulado){
 		return Raiz;
         }
-        
+
         for(x in graph[sai]){
             if(caminho.indexOf(x) == -1 && graph[sai][x] != undefined && graph[sai][x] != ""){
                 Raiz.addFilho(x,branch(graph,x,chega,caminho,parseInt(acumulado + parseInt(graph[sai][x])),Raiz,caminhos));
             }
         }
-        
+
         if(Object.keys(Raiz.getFilhos()).length <= 0){
             caminhos.push({caminho: caminho, valorAcumulado: Raiz.getValorAcumulado()});
-            
+
             if(sai == chega && Raiz.getValorAcumulado() < bestSolution.valorAcumulado){
             	bestSolution.valorAcumulado = Raiz.getValorAcumulado();
             	bestSolution.caminho = caminho;
             }
-            
+
         }
         return Raiz;
     }
@@ -341,50 +341,52 @@
     }
 
     solucao = undefined;*/
-    
-    
+
+
     function branchAndBound(graph,sai,chega){
-    	var caminhos = [];
-    	caminhos.push({caminho: [sai], custo: 0});
-    	
-    	while(!caminhos.some( (curr) => curr.caminho.indexOf(chega) != -1 ) && caminhos.length > 0){
-    		//Pego o primeiro caminho da fila
-    		var caminhoInicio = caminhos[0];
-    		//Retiro da fila
-    		caminhos = caminhos.slice(1);
-    		//Pego o ultimo elemento do caminho para estender seus filhos
-    		var ultimoElemento = caminhoInicio.caminho[caminhoInicio.caminho.length - 1];
-    		//Adicionando todos os filhos que não fazem ciclo
-    		for(var i in graph[ultimoElemento]){
-    			//Se não faz ciclo e é filho, adiciona o novo caminho a fila
-    			if(!caminhoInicio.caminho.some( (curr) => curr == i ) && graph[ultimoElemento][i] != undefined && graph[ultimoElemento][i] != ""){
-    				console.log("sai de " + $("#obj"+ ultimoElemento).val() + " vai para " + $("#obj"+ i).val());
-    				var novoCaminho = Object.assign({}, caminhoInicio);
-    				novoCaminho.caminho.push(i);
-    				novoCaminho.custo = parseInt(novoCaminho.custo) + parseInt(graph[ultimoElemento][i]);
-    				caminhos.push(novoCaminho);
-    			}
-    		}
-    		alert("Realizando o sort");
-    		//Ordenando segundo o custo acumulado
-    		caminhos.sort( (a,b) => a.custo-b.custo);
-    		alert("Terminou");
-    		console.log(caminhos);
-    	}
-    	return caminhos;
-    }
+        	var caminhos = [];
+        	caminhos.push({caminho: [sai], custo: 0});
+
+    		console.log("Novo Caminho Adicionado: ");
+    		console.log({caminho: [sai], custo: 0});
+    		console.log("\n\n");
+
+        	while(!caminhos.some( (curr) => curr.caminho.indexOf(chega) != -1 ) && caminhos.length > 0){
+        		//Pego o primeiro caminho da fila
+        		var caminhoInicio = caminhos[0];
+        		//Retiro da fila
+        		caminhos = caminhos.slice(1);
+        		//Pego o ultimo elemento do caminho para estender seus filhos
+        		var ultimoElemento = caminhoInicio.caminho[caminhoInicio.caminho.length - 1];
+        		//Adicionando todos os filhos que não fazem ciclo
+        		for(var i in graph[ultimoElemento]){
+        			//Se não faz ciclo e é filho, adiciona o novo caminho a fila
+        			if(graph[ultimoElemento][i] != undefined && graph[ultimoElemento][i] != "" && !caminhoInicio.caminho.some( (curr) => curr == i )){
+        				var novoCaminho = JSON.parse(JSON.stringify(caminhoInicio));
+        				novoCaminho.caminho.push(i);
+        				novoCaminho.custo = parseInt(novoCaminho.custo) + parseInt(graph[ultimoElemento][i]);
+        				caminhos.push(novoCaminho);
+        				console.log("Novo Caminho Adicionado: ");
+        				console.log(novoCaminho);
+        				console.log("\n\n");
+
+        			}
+        		}
+        		//Ordenando segundo o custo acumulado
+        		caminhos.sort( (a,b) => a.custo-b.custo);
+        		console.log("Caminhos Ordenados:");
+        		console.log(caminhos);
+        		console.log("\n\n");
+        	}
+        	return caminhos;
+     }
 
     $(document).on("ready",function(){
         $("#criar-solucao-btn").on("click",function(){
-            solucao = branchAndBound(JSON.parse('{"1":{"1":"","1092":"","2192":"","2634":"","3024":"4","3864":"","4512":"","7223":"3"},"1092":{"1":"","1092":"","2192":"4","2634":"","3024":"","3864":"","4512":"5","7223":"4"},"2192":{"1":"","1092":"4","2192":"","2634":"","3024":"","3864":"","4512":"","7223":""},"2634":{"1":"","1092":"","2192":"","2634":"","3024":"","3864":"3","4512":"4","7223":""},"3024":{"1":"4","1092":"","2192":"","2634":"","3024":"","3864":"","4512":"2","7223":"5"},"3864":{"1":"","1092":"","2192":"","2634":"3","3024":"","3864":"","4512":"","7223":""},"4512":{"1":"","1092":"5","2192":"","2634":"4","3024":"2","3864":"","4512":"","7223":""},"7223":{"1":"3","1092":"4","2192":"","2634":"","3024":"5","3864":"","4512":"","7223":""}}'),$("#sai").val(),$("#chega").val());
-            console.log(solucao);
-            /*var nodes = bestSolution.caminho.split("-").slice(1);
-            var viewCaminho = "-";
-            for(var n in nodes){
-            	viewCaminho += "-" + $("#obj" + nodes[n]).val();
-            }
-            
-            $("#solucao-view").html("<h2>"+ viewCaminho.replace("--","") + " = " + bestSolution.valorAcumulado +"</h2>");*/
+            var solucao = branchAndBound(grafo,$("#sai").val(),$("#chega").val());
+            var melhor = solucao.find( (curr) => curr.caminho.some( (currNo) => currNo == $("#chega").val() ) );
+            var melhorCustomizado = melhor.caminho.reduce( (prev,curr) => {prev.push($("#obj" + curr).val()); return prev;} , []);
+            $("#solucao-view").html("<h2>"+ melhorCustomizado.join(" => ") + " = " + melhor.custo +"</h2>");
 
         });
     });
