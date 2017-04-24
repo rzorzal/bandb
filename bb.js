@@ -15,9 +15,14 @@ function branchAndBound(graph,sai,chega){
 		console.log({caminho: [sai], custo: 0});
 		console.log("\n\n");
 
-    	while(!caminhos.some( (curr) => curr.caminho.indexOf(chega) != -1 ) && caminhos.length > 0){
+    	while(/*!caminhos.some( (curr) => curr.caminho.indexOf(chega) != -1 ) */  caminhos.length > 0){
     		//Pego o primeiro caminho da fila
     		var caminhoInicio = caminhos[0];
+    		
+    		if(caminhoInicio.caminho[caminhoInicio.caminho.length-1] == chega){
+    			return caminhos;
+    		}
+    		
     		//Retiro da fila
     		caminhos = caminhos.slice(1);
     		//Pego o ultimo elemento do caminho para estender seus filhos
@@ -41,6 +46,7 @@ function branchAndBound(graph,sai,chega){
     		console.log("Caminhos Ordenados:");
     		console.log(caminhos);
     		console.log("\n\n");
+
     	}
     	return caminhos;
 
@@ -132,4 +138,7 @@ grafo = {
 console.log(grafo);
 console.log("\n\n");
 
- branchAndBound(grafo,'S','G');
+var resultado = branchAndBound(grafo,'S','G');
+console.log("Resultado:");
+console.log(resultado[0]);
+ 
